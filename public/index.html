@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClassLens · 教師診斷後台</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+ :root{--bg:#0f172a;--card:#1e293b;--ink:#e2e8f0;--mut:#94a3b8;--accent:#38bdf8;--bad:#f87171;--ok:#4ade80}
+ *{box-sizing:border-box} body{margin:0;font-family:-apple-system,"Noto Sans TC",sans-serif;background:#f1f5f9;color:#0f172a}
+ header{background:var(--bg);color:#fff;padding:18px 24px}
+ header h1{margin:0;font-size:20px} header p{margin:4px 0 0;color:var(--mut);font-size:13px}
+ .wrap{max-width:1100px;margin:0 auto;padding:20px}
+ .tabs{display:flex;gap:8px;margin:16px 0}
+ .tabs button{border:0;padding:8px 16px;border-radius:8px;background:#e2e8f0;cursor:pointer;font-size:14px}
+ .tabs button.active{background:#0f172a;color:#fff}
+ .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+ .kpi{background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08);flex:1;min-width:150px}
+ .kpi b{font-size:24px} .kpi span{color:#64748b;font-size:13px;display:block}
+ .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px}
+ .card h2{margin:0 0 12px;font-size:16px}
+ table{width:100%;border-collapse:collapse;font-size:14px}
+ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #eef2f7}
+ th{color:#64748b;font-weight:600}
+ .chip{display:inline-block;background:#fee2e2;color:#b91c1c;padding:2px 8px;border-radius:999px;font-size:12px;margin:2px}
+ a.btn{color:#0369a1;text-decoration:none;font-weight:600}
+ .heatcell{padding:8px;border-radius:6px;text-align:center;color:#0f172a;font-size:13px}
+</style></head>
+<body>
+<header><h1>ClassLens · 模考診斷後台</h1>
+<p>把你已經在收的答案卡，變成留得住學生、說服得了家長的診斷 — 教學交給老師，診斷交給系統。</p></header>
+<div class="wrap">
+ <div class="tabs" id="tabs"></div>
+ <div class="kpis" id="kpis"></div>
+ <div class="card"><h2>單元弱點熱圖（最近一次模考，平均掌握度 %）</h2>
+   <div id="heat"></div></div>
+ <div class="card"><h2>班級弱點 Top 3（建議下週補強）</h2><div id="weak"></div></div>
+ <div class="card"><h2>學生名單（依難度校正分數排序）</h2>
+   <table><thead><tr><th>排名</th><th>姓名</th><th>校正分數</th><th>百分位</th><th>預期提分</th><th>最弱單元</th><th>個人化建議書</th></tr></thead>
+   <tbody id="rows"></tbody></table></div>
+</div>
+<script>
+let DATA, current;
+fetch('data.json').then(r=>r.json()).then(d=>{DATA=d;current=Object.keys(d.classes)[0];render();});
+function color(v){if(v==null)return '#f1f5f9';const t=Math.max(0,Math.min(100,v))/100;
+  const r=Math.round(248-(248-74)*t),g=Math.round(113+(222-113)*t),b=Math.round(113+(128-113)*t);
+  return `rgb(${r},${g},${b})`;}
+function render(){
+  const tabs=document.getElementById('tabs');tabs.innerHTML='';
+  Object.keys(DATA.classes).forEach(c=>{const b=document.createElement('button');
+    b.textContent=c;b.className=c===current?'active':'';b.onclick=()=>{current=c;render();};tabs.appendChild(b);});
+  const cls=DATA.classes[current];
+  document.getElementById('kpis').innerHTML=
+    `<div class="kpi"><b>${cls.n_students}</b><span>學生人數</span></div>
+     <div class="kpi"><b>${cls.avg_score}</b><span>班級平均（校正分數）</span></div>
+     <div class="kpi"><b>${cls.weakest_topics[0]}</b><span>全班最弱單元</span></div>`;
+  // heatmap
+  let h='<table><tr>'+DATA.topics.map(t=>`<th style="font-size:12px">${t}</th>`).join('')+'</tr><tr>';
+  h+=DATA.topics.map(t=>{const v=cls.heatmap[t];
+    return `<td><div class="heatcell" style="background:${color(v)}">${v==null?'–':v}</div></td>`;}).join('');
+  h+='</tr></table>';document.getElementById('heat').innerHTML=h;
+  document.getElementById('weak').innerHTML=cls.weakest_topics.map(t=>`<span class="chip">${t}</span>`).join(' ');
+  // rows
+  document.getElementById('rows').innerHTML=cls.students.map((sid,i)=>{const s=DATA.students[sid];
+    const gain=(s.projected_score-s.score_latest).toFixed(1);
+    return `<tr><td>${i+1}</td><td>${s.name}</td><td>${s.score_latest}</td><td>${s.percentile}%</td>
+      <td style="color:#15803d;font-weight:600">+${gain}</td>
+      <td>${s.weak_topics.map(t=>`<span class="chip">${t}</span>`).join('')}</td>
+      <td><a class="btn" href="report.html?student=${sid}" target="_blank">開啟 ↗</a></td></tr>`;}).join('');
+}
+</script></body></html>
