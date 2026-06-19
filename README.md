@@ -3,7 +3,8 @@
 > A data system that turns the answer-sheet data a cram school (or an independent
 > tutor) **already collects** into a **personalised study plan for each student** —
 > the weak-but-heavily-tested topics ranked by payoff, a two-week practice
-> sequence, and a **projected score lift**. That personalised recommendation is
+> sequence, and an **estimated attainable lift** (an explainable opportunity
+> estimate, not a validated prediction). That personalised recommendation is
 > the sellable value: a school uses it to recruit and retain (show parents exactly
 > what to work on and the expected gain), and a solo tutor can use it with a single
 > student. The teacher keeps the teaching; the system does the routine diagnosis,
@@ -20,7 +21,7 @@ Repo: https://github.com/petercechung/classlens · Report: `report/b12902013.pdf
 |-------|------|--------------|
 | **Ingestion** | `src/ingest.py` | Load weekly mock-exam answer sheets (CSV: students, item bank, responses) into a store. |
 | **Storage** | SQLite (`data/classlens.db`) | Relational store; same schema/queries map directly to Postgres / a columnar warehouse at scale (see `ARCHITECTURE.md`). |
-| **Processing** | `src/process.py` | Difficulty-weighted **topic mastery**, **class heatmap**, **cohort percentile**, **term trend**, and the core output — a **personalised study plan** (topics ranked by gap × exam-weight) with a **projected score lift**. |
+| **Processing** | `src/process.py` | Difficulty-weighted **topic mastery**, **class heatmap**, **cohort percentile**, **term trend**, and the core output — a **personalised study plan** (topics ranked by gap × exam-weight) with an **estimated attainable lift** (explainable opportunity estimate, not a validated prediction). |
 | **Delivery** | `src/deliver.py` → `public/` | A teacher **dashboard** (`index.html`), a **student/parent portal** (`student.html`, pick identity → own report), and the printable **personalised report** (`report.html?student=<id>`) — works for a single tutored student too. Static + deployable. |
 
 The diagnostic model is a light **IRT-style** scheme: getting a *hard* item right

@@ -238,8 +238,11 @@ def build():
             "as an independent math tutor, so the first user observation is the "
             "author's own workflow: after a quiz, wrong answers must be grouped "
             "by topic, converted into next-practice advice and explained to "
-            "students/parents. This validates the workflow pain, but it is "
-            "biased single-practitioner evidence rather than market proof."]),
+            "students/parents (written up in the repo, "
+            "<font face='Courier'>survey/interview_notes.md</font>). This "
+            "validates the workflow pain, but on its own it is single-"
+            "practitioner evidence rather than market proof &mdash; hence the "
+            "survey instrument above for a wider round."]),
           P("The quantitative claims below therefore rest on the <i>real</i> "
             "public-market and competitor-pricing data; the survey instrument "
             "converts that into school-level willingness-to-pay once run."),

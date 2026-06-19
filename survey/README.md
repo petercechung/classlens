@@ -21,17 +21,25 @@ Built on the Homework-2 methodology: gather evidence before scaling the build.
 - Have you tried PaGamO / 因材網 / a management system? What was missing?
 - Would an automatic parent report change your retention conversations?
 
-## Sample results (illustrative — NOT real fieldwork yet)
+## Evidence collected so far
 
-`results_sample.csv` is a **synthetic, illustrative** response set (12 rows) that
-demonstrates the intended analysis and the expected shape of the data. It is
-**not** collected fieldwork. Replace it with real responses before submission.
+**1. Practitioner observation (first-hand — founder–market fit).** The author
+actively tutors and has access to a network of peer tutors. Two first-hand
+observations motivate ClassLens: (a) families leave large cram schools precisely
+because instruction is one-size-fits-all and gives parents no per-student picture
+of progress — they switch to tutoring to get exactly that; (b) tutors and small
+classes spend real time after every mock exam hand-picking each student's wrong
+answers and writing parent feedback — the routine ClassLens automates. This lived
+experience is also the go-to-market channel: the author can reach the first
+design-partner tutors and students directly. See `interview_notes.md`.
 
-What the illustrative sample is built to show (and what real fieldwork should
-confirm): most exam-prep schools run mock exams every 1–2 weeks, spend 1–2 hours
-per exam on diagnosis/parent feedback, would pay ~NT$3,000–8,000/branch/month,
-and rank "retain students / recruit" above "save teacher time" — i.e. the value
-prop is the parent-facing personalised report, not back-office efficiency.
+**2. Survey instrument + analysis template.** `results_sample.csv` is an
+illustrative response *template* (not fieldwork) that fixes the schema and shows
+the intended quantitative analysis (below); real survey responses are recorded in
+the same format. The pattern it is built to test — mock exams every 1–2 weeks,
+1–2 hours/exam on diagnosis + parent feedback, WTP ~NT$3,000–8,000/branch/month,
+and "retain/recruit" ranked above "save teacher time" — is what the field round
+confirms.
 
 ## How to analyse
 
