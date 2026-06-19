@@ -1,0 +1,11 @@
+# Core pipeline (run.py: generate -> ingest -> process -> deliver)
+#   stdlib only (sqlite3, csv, json) — no external deps required.
+#
+# Importer (src/import_data.py): reading .xlsx / .csv answer sheets
+pandas>=2.0
+openpyxl>=3.1
+#
+# Report builder (report/build_report.py): figures + PDF
+matplotlib>=3.7
+numpy>=1.24
+reportlab>=4.0

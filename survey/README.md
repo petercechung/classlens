@@ -21,6 +21,18 @@ Built on the Homework-2 methodology: gather evidence before scaling the build.
 - Have you tried PaGamO / 因材網 / a management system? What was missing?
 - Would an automatic parent report change your retention conversations?
 
+## Sample results (illustrative — NOT real fieldwork yet)
+
+`results_sample.csv` is a **synthetic, illustrative** response set (12 rows) that
+demonstrates the intended analysis and the expected shape of the data. It is
+**not** collected fieldwork. Replace it with real responses before submission.
+
+What the illustrative sample is built to show (and what real fieldwork should
+confirm): most exam-prep schools run mock exams every 1–2 weeks, spend 1–2 hours
+per exam on diagnosis/parent feedback, would pay ~NT$3,000–8,000/branch/month,
+and rank "retain students / recruit" above "save teacher time" — i.e. the value
+prop is the parent-facing personalised report, not back-office efficiency.
+
 ## How to analyse
 
 - Convert Q3 (minutes) into a labour-cost estimate per exam → annualised time saved.

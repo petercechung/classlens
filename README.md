@@ -10,7 +10,7 @@
 > recommendation, and report-writing.
 
 **Big Data Systems — Final Project (Spring 2026, NTU)**
-Repo: https://github.com/petercechung/classlens · Report: `report/b12902013.pdf` · Live demo: _<add Vercel URL>_
+Repo: https://github.com/petercechung/classlens · Report: `report/b12902013.pdf` · Live demo: https://classlens.cechung.com (teacher dashboard; `/student.html` = student portal)
 
 ---
 
@@ -21,7 +21,7 @@ Repo: https://github.com/petercechung/classlens · Report: `report/b12902013.pdf
 | **Ingestion** | `src/ingest.py` | Load weekly mock-exam answer sheets (CSV: students, item bank, responses) into a store. |
 | **Storage** | SQLite (`data/classlens.db`) | Relational store; same schema/queries map directly to Postgres / a columnar warehouse at scale (see `ARCHITECTURE.md`). |
 | **Processing** | `src/process.py` | Difficulty-weighted **topic mastery**, **class heatmap**, **cohort percentile**, **term trend**, and the core output — a **personalised study plan** (topics ranked by gap × exam-weight) with a **projected score lift**. |
-| **Delivery** | `src/deliver.py` → `public/` | A teacher **dashboard** (`index.html`) and a printable **personalised report** (`report.html?student=<id>`) — works for a single tutored student too. Both static + deployable. |
+| **Delivery** | `src/deliver.py` → `public/` | A teacher **dashboard** (`index.html`), a **student/parent portal** (`student.html`, pick identity → own report), and the printable **personalised report** (`report.html?student=<id>`) — works for a single tutored student too. Static + deployable. |
 
 The diagnostic model is a light **IRT-style** scheme: getting a *hard* item right
 counts more than an easy one, so the system recovers each student's true weak

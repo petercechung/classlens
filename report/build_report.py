@@ -23,11 +23,19 @@ from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Image,
 HERE = os.path.dirname(__file__)
 FIGS = os.path.join(HERE, "figs")
 os.makedirs(FIGS, exist_ok=True)
-DATA = os.path.join(HERE, "..", "classlens", "public", "data.json")
+# Resolve data.json across both layouts: inside the repo (classlens/report ->
+# classlens/public) and the course working tree (BDA_final/report ->
+# BDA_final/classlens/public).
+_DATA_CANDIDATES = [
+    os.path.join(HERE, "..", "public", "data.json"),
+    os.path.join(HERE, "..", "classlens", "public", "data.json"),
+]
+DATA = next((p for p in _DATA_CANDIDATES if os.path.exists(p)),
+            _DATA_CANDIDATES[0])
 OUT = os.path.join(HERE, "b12902013.pdf")
 
 GITHUB = "https://github.com/petercechung/classlens"
-DEMO = "https://classlens-demo.vercel.app  (replace with your Vercel URL, or remove)"
+DEMO = "https://classlens.cechung.com"
 
 EN = {
     "多項式函數": "Polynomials", "指數與對數": "Exp & Log",
@@ -146,6 +154,10 @@ def build():
           P("Student ID: <b>b12902013</b>"),
           P(f"GitHub repository: <font color='#0369a1'>{GITHUB}</font>"),
           P(f"Live demo: <font color='#0369a1'>{DEMO}</font>"),
+          P("Demo walkthrough: teacher dashboard "
+            "(<font face='Courier'>/</font>), student portal "
+            "(<font face='Courier'>/student.html</font>), and example report "
+            "(<font face='Courier'>/report?student=S1004</font>)."),
           Spacer(1, 0.35 * cm),
           Paragraph("Executive summary", H2),
           P("Taiwanese cram schools (buxiban) run weekly mock exams and then "
@@ -153,8 +165,9 @@ def build():
             "<b>ClassLens</b> ingests that existing answer-sheet data and turns "
             "it into a <b>personalised study plan for each student</b>: the "
             "weak topics that are also heavily tested, ranked by payoff, with a "
-            "two-week practice sequence and a <b>projected score lift</b> if the "
-            "plan is followed &mdash; delivered as a print-ready report. "
+            "two-week practice sequence and an <b>estimated attainable score "
+            "lift</b> if the plan is followed &mdash; delivered as a print-ready "
+            "report. "
             "Internal-efficiency framing (saving teacher time) is too weak a "
             "motivator on its own; the sellable value is the personalised "
             "recommendation, which a school uses to <b>recruit and retain</b> "
@@ -177,10 +190,14 @@ def build():
           P("<b>Why personalisation, not admin efficiency, is the wedge.</b> "
             "Saving a teacher an hour is a weak purchase trigger &mdash; teacher "
             "time is cheap and the pain is mild. What a school will pay for is a "
-            "<b>per-student personalised plan with a projected score gain</b>, "
+            "<b>per-student personalised plan with an explainable lift estimate</b>, "
             "because that is something it can put in front of parents to recruit "
-            "and to justify staying enrolled. The deliverable is therefore a "
-            "sales/retention asset, not an internal report."),
+            "and to justify staying enrolled. A peer-tutor interview reinforced "
+            "this wedge: some students had left large cram schools for private "
+            "tutoring because standardised large-class resources were not "
+            "customised enough. The "
+            "deliverable is therefore a sales/retention asset, not an internal "
+            "report."),
           P("<b>Why this wedge.</b> Taiwan has roughly <b>12,500 academic "
             "(wenli) cram schools (~17,500 operating entities)</b>, an industry "
             "estimated at <b>NT$150&ndash;170 billion/year</b>, highly fragmented "
@@ -203,32 +220,44 @@ def build():
     E += [Paragraph("2. Evidence of demand and willingness to pay", H1),
           Paragraph("2.1 Data-acquisition process", H2),
           P("Following the Homework-2 methodology, demand is established from "
-            "three sources:"),
+            "four sources:"),
           bullets([
             "<b>Public / market data:</b> Ministry-of-Interior and industry "
             "statistics on cram-school counts, sector value and per-capita "
             "tutoring spend (below).",
             "<b>Competitor pricing benchmarks:</b> existing tools' published "
             "prices, used as willingness-to-pay anchors.",
-            "<b>Practitioner interviews + survey (reproducible):</b> a 6-question "
-            "structured survey and a 10-school interview guide (in the repo, "
-            "<font face='Courier'>survey/</font>) targeting school owners via the "
-            "author's tutoring / cram-school network &mdash; measuring minutes "
-            "per exam spent on diagnosis/reporting and what they would pay to "
-            "automate it."]),
+            "<b>A reproducible survey instrument (not yet a full field result):</b> "
+            "a 6-question owner survey and a 10-school interview guide (in the "
+            "repo, <font face='Courier'>survey/</font>) plus an illustrative "
+            "response sample (<font face='Courier'>survey/results_sample.csv</font>) "
+            "showing the intended analysis &mdash; minutes/exam spent on "
+            "diagnosis and stated WTP. A full field round with the author's "
+            "tutoring / cram-school contacts is the planned next step.",
+            "<b>Practitioner workflow observation:</b> the author already works "
+            "as an independent math tutor, so the first user observation is the "
+            "author's own workflow: after a quiz, wrong answers must be grouped "
+            "by topic, converted into next-practice advice and explained to "
+            "students/parents. This validates the workflow pain, but it is "
+            "biased single-practitioner evidence rather than market proof."]),
+          P("The quantitative claims below therefore rest on the <i>real</i> "
+            "public-market and competitor-pricing data; the survey instrument "
+            "converts that into school-level willingness-to-pay once run."),
           Paragraph("2.2 Quantified demand signals", H2)]
 
     t1 = Table([
         ["Signal", "Value", "Source"],
-        ["Academic cram schools (Mar 2025)", "~12,539 (≈17,500 entities)",
-         "PTS / Global Views"],
-        ["Sector value (estimate)", "NT$150–170 bn / yr", "UDN / Business Weekly"],
-        ["Per-capita tutoring spend (JH, 2018)", "≈ NT$52,853 / student / yr",
-         "MOE Statistics"],
-        ["Comparable B2C tool WTP (HousePlus AVM)", "freemium + paid",
-         "houseplus.com.tw"],
-        ["Analogue SaaS WTP band", "US$25–199 / mo", "PropStream / Mashvisor"],
-    ], colWidths=[6.4 * cm, 4.9 * cm, 4.1 * cm])
+        [Paragraph("Academic cram schools (2025)", small),
+         Paragraph("~12,539", small), Paragraph("PTS", small)],
+        [Paragraph("Sector value (estimate)", small),
+         Paragraph("≈ NT$150 billion / yr", small), Paragraph("SEF", small)],
+        [Paragraph("JH out-of-school / tutoring spend", small),
+         Paragraph("≈ NT$71k / yr;<br/>tutoring ≈ NT$60k / yr", small),
+         Paragraph("MOE via CNA", small)],
+        [Paragraph("Tutoring-management SaaS pricing (WTP anchor)", small),
+         Paragraph("NT$1,500–10,000 / mo", small),
+         Paragraph("VibeAI / SchoolTracs", small)],
+    ], colWidths=[7.0 * cm, 5.2 * cm, 3.2 * cm])
     t1.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
@@ -243,12 +272,26 @@ def build():
     E += [t1, Spacer(1, 0.2 * cm),
           P("<b>Willingness to pay (pricing model).</b> B2B subscription priced "
             "per branch: <b>NT$3,000&ndash;8,000 / month / branch</b>, or per "
-            "enrolled student per term. The value is concrete: at NT$45,000+ "
-            "tuition per student-year, retaining a single student who would "
-            "otherwise leave covers many months of subscription, and the parent "
-            "report doubles as a recruitment tool. Comparable analytics/SaaS "
-            "tools in adjacent verticals sustain US$25&ndash;199/month, "
-            "supporting this band.")]
+            "enrolled student per term. This sits inside an established budget "
+            "line: tutoring-management systems (e.g. SchoolTracs and the systems "
+            "surveyed by VibeAI) already charge schools roughly "
+            "<b>NT$1,500&ndash;10,000 / month</b>, so schools are used to paying "
+            "for back-office SaaS. The value is concrete: with per-student "
+            "tutoring spend around NT$60,000/year, retaining a single student "
+            "who would otherwise leave covers many months of subscription, and "
+            "the personalised report doubles as a recruitment tool."),
+          Paragraph("2.3 Why the author can test this wedge", H2),
+          P("The author's tutoring work is useful as a <b>beachhead pilot</b>: "
+            "it shows the routine workflow ClassLens automates (diagnose wrong "
+            "answers, identify weak topics, write student/parent-facing next "
+            "steps) and provides a low-friction first dataset. The peer-tutor "
+            "interview adds <b>access</b>, not statistical proof: it points to "
+            "students who already left large cram schools because customised "
+            "resources were weak, giving the project a realistic first interview "
+            "and pilot channel. The report therefore treats this as founder-"
+            "market fit and early user access, while the pricing claim remains "
+            "anchored by public market size and tutoring-management SaaS "
+            "benchmarks.")]
 
     # ---- 3 system ----
     E += [Paragraph("3. System design", H1),
@@ -282,12 +325,14 @@ def build():
             "computes topic mastery, a class weakness heatmap, cohort percentile "
             "and a term trend. The core output is a <b>personalised study "
             "plan</b>: topics are ranked by <i>gap x exam-weight</i> (a weak "
-            "topic that is also heavily tested has the highest payoff), sequenced "
-            "into a two-week plan, with a <b>projected score contribution</b> "
-            "from raising each to an achievable target &mdash; so the report "
-            "promises a concrete expected gain (e.g. 47.9 &rarr; 60.3). All "
-            "metrics are explainable SQL aggregations + light Python: cheap, and "
-            "trustworthy for teachers and parents."),
+            "topic that is also heavily tested has the highest payoff) and "
+            "sequenced into a two-week plan. Each topic carries an <b>estimated "
+            "attainable lift</b> &mdash; an <i>explainable heuristic</i> (raise a "
+            "weak topic by a capped step toward a target, weighted by its share "
+            "of the exam), presented as an <b>opportunity estimate, not a "
+            "validated prediction</b>. All metrics are explainable SQL "
+            "aggregations + light Python: cheap, and easy for teachers and "
+            "parents to trust."),
           Image(heat, width=16.5 * cm, height=4.2 * cm),
           Paragraph("<i>Figure: real pipeline output &mdash; class weakness "
             "heatmap across the three demo classes (mean mastery %, latest mock "
@@ -297,12 +342,39 @@ def build():
             "topic-mastery radar and term trend, as shown in the parent "
             "report.</i>", small),
           Paragraph("3.4 Delivery", H2),
-          P("Two static artifacts that read <font face='Courier'>data.json</font> "
+          P("Three static views that read <font face='Courier'>data.json</font> "
             "at runtime: a <b>teacher dashboard</b> (class heatmap, ranked "
-            "students, weak topics) and a <b>printable parent report</b> "
+            "students, weak topics); a <b>student/parent portal</b> "
+            "(<font face='Courier'>student.html</font>) where a student selects "
+            "their identity and opens their own report &mdash; so the product is "
+            "not teacher-only; and the <b>personalised report</b> itself "
             "(<font face='Courier'>report.html?student=ID</font>; radar, trend, "
-            "strengths/weaknesses, targeted practice). Both deploy as a "
-            "read-only static bundle (Vercel/Render/Pages)."),
+            "two-week plan, estimated lift). In production the portal is "
+            "login-gated so a student sees only their own report (PDPA). All "
+            "deploy as a read-only static bundle (Vercel)."),
+          Table([
+              ["Route", "What the grader can verify"],
+              [Paragraph("<font face='Courier'>/</font>", small),
+               Paragraph("Teacher dashboard with class tabs, KPI cards, "
+                         "weakness heatmap and ranked student list.", small)],
+              [Paragraph("<font face='Courier'>/student.html</font>", small),
+               Paragraph("Student/parent entry point for opening an individual "
+                         "report without using the teacher dashboard.", small)],
+              [Paragraph("<font face='Courier'>/report?student=S1004</font>",
+                         small),
+               Paragraph("Example personalised report with radar chart, trend "
+                         "chart and two-week study plan.", small)],
+          ], colWidths=[7.1 * cm, 8.3 * cm], style=TableStyle([
+              ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
+              ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+              ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+              ("FONTSIZE", (0, 0), (-1, -1), 8),
+              ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+              ("VALIGN", (0, 0), (-1, -1), "TOP"),
+              ("TOPPADDING", (0, 0), (-1, -1), 4),
+              ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+          ])),
+          Spacer(1, 0.15 * cm),
           Paragraph("3.5 Scalability &amp; cost", H2),
           P("The workload is bursty and batch-shaped: each exam upload triggers "
             "one diagnostic run, embarrassingly parallel by school/exam &mdash; "
@@ -312,47 +384,83 @@ def build():
             "on upload.")]
 
     # ---- 4 GTM ----
+    gtm_rows = [
+        ["Difficulty", "Why it is hard", "ClassLens mitigation"],
+        [Paragraph("<b>Trust &amp; adoption</b>", small),
+         Paragraph("Teachers and parents will not trust a black-box AI score, "
+                   "especially if it claims a precise grade increase.", small),
+         Paragraph("Run on the school's own exams; show topic mastery, exam "
+                   "weight and the heuristic lift calculation. The teacher keeps "
+                   "final judgment and can add comments.", small)],
+        [Paragraph("<b>Data acquisition friction</b>", small),
+         Paragraph("Small cram schools have messy Excel / OMR exports and do "
+                   "not want to change their teaching system.", small),
+         Paragraph("Importer accepts wide answer-sheet CSV/XLSX, computes "
+                   "difficulty from pass rate and requires only a question-topic "
+                   "map. One-class pilot can run from an existing exam.", small)],
+        [Paragraph("<b>Privacy / PDPA</b>", small),
+         Paragraph("Student performance data is sensitive and parents may object "
+                   "to cross-school data resale.", small),
+         Paragraph("Use anonymised student IDs, school-as-data-controller, "
+                   "single-tenant or on-prem deployment for conservative schools "
+                   "and no resale of student-level data.", small)],
+        [Paragraph("<b>Cold start</b>", small),
+         Paragraph("Without real school data, the product has little proof that "
+                   "reports improve retention or parent conversations.", small),
+         Paragraph("Start with the author's tutoring workflow and one design-"
+                   "partner class; use before/after parent-report examples as "
+                   "sales proof before scaling to 10-school interviews.", small)],
+        [Paragraph("<b>Competition &amp; moat</b>", small),
+         Paragraph("PaGamO / Yincai Net and management systems already exist; "
+                   "large chains may build internal analytics.", small),
+         Paragraph("Avoid competing as a content platform or admin system. The "
+                   "wedge is analysing the school's own exams and turning that "
+                   "data into parent-facing retention material for independents "
+                   "and small chains.", small)],
+        [Paragraph("<b>Unit economics</b>", small),
+         Paragraph("Small branches have limited budgets, so heavy model or "
+                   "support costs would break the business.", small),
+         Paragraph("Batch processing on small append-only response tables keeps "
+                   "marginal compute low. NT$3k-8k/month is justified if one "
+                   "retained student covers months of subscription.", small)],
+    ]
     E += [Paragraph("4. Go-to-market difficulties (bonus)", H1),
-          bullets([
-            "<b>Trust &amp; adoption:</b> diagnostics must be explainable and "
-            "run on the school's <i>own</i> exams; we avoid black-box scores. "
-            "Friction is minimised by importing an existing card-reader/Excel "
-            "export (no data re-entry, difficulty auto-computed), so a free "
-            "one-class, one-exam pilot takes minutes.",
-            "<b>Data acquisition &amp; privacy:</b> student data is sensitive "
-            "under Taiwan's PDPA. Mitigations: school-as-data-controller, "
-            "anonymised IDs, single-tenant/on-prem option, no data resale.",
-            "<b>Cold start:</b> solved via the author's cram-school connections "
-            "for a first design-partner school, seeding both demo data and "
-            "demand evidence.",
-            "<b>Competition &amp; moat:</b> PaGamO / Yincai Net are content "
-            "platforms (walled question banks, K-12 literacy, school channel). "
-            "Our moat is data-infrastructure on the school's own materials + the "
-            "parent-report workflow, not content. Large chains may build "
-            "in-house, so we target independents and small chains first.",
-            "<b>Unit economics:</b> near-zero marginal cost per added school "
-            "(batch compute on small data); profitability is driven by branch "
-            "count and retention, not heavy infrastructure."])]
+          P("The hardest part is not building the dashboard; it is making a "
+            "small cram school trust, adopt and repeatedly pay for a diagnostic "
+            "workflow. The table below maps the main promotion risks to concrete "
+            "mitigations."),
+          Table(gtm_rows, colWidths=[3.1 * cm, 6.1 * cm, 6.2 * cm],
+                repeatRows=1,
+                style=TableStyle([
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("GRID", (0, 0), (-1, -1), 0.4,
+                     colors.HexColor("#cbd5e1")),
+                    ("ROWBACKGROUNDS", (0, 1), (-1, -1),
+                     [colors.white, colors.HexColor("#f8fafc")]),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ]))]
 
     # ---- refs ----
     E += [Paragraph("References", H1),
           bullets([
-            "PTS News Lab &mdash; Why cram schools keep growing despite "
-            "declining birth rates (counts / sector value). "
-            "newslab.pts.org.tw/video/349",
-            "Global Views Monthly &mdash; Cram-school growth and category "
-            "trends. gvm.com.tw/article/36384",
-            "United Daily News &mdash; Learning-portfolio classes; "
-            "hundred-billion tutoring market. udn.com/news/story/6885/4928037",
-            "Business Weekly Wealth &mdash; Tutoring stocks; household education "
-            "spending. wealth.businessweekly.com.tw",
-            "Ministry of Education Statistics &mdash; Out-of-school learning and "
-            "tutoring expenditure. depart.moe.edu.tw/ED4500/",
-            "PaGamO Learning &mdash; product / teacher backend (weak-point "
-            "analysis). school.pagamo.org/product-and-service",
-            "HousePlus &mdash; online AVM (B2C WTP analogue). houseplus.com.tw",
-            "PropStream / Mashvisor pricing (SaaS WTP analogue). "
-            "realestatebees.com",
+            "PTS News Lab &mdash; cram-school counts (~12,539 academic cram "
+            "schools, 2025). newslab.pts.org.tw/video/349",
+            "SEF &mdash; tutoring sector value (≈ NT$150 billion / yr). "
+            "sef.org.tw/article-1-129-12653",
+            "CNA (citing MOE statistics) &mdash; junior-high out-of-school "
+            "learning ≈ NT$71k/yr, tutoring ≈ NT$60k/yr per student. "
+            "cna.com.tw/news/ahel/202201290059.aspx",
+            "SchoolTracs &mdash; tutoring-centre management system (B2B SaaS WTP "
+            "anchor). schooltracs.com/tw/",
+            "VibeAI &mdash; tutoring-management system comparison; monthly fees "
+            "≈ NT$1,500&ndash;10,000. vibeaico.com/blog/"
+            "tutoring-management-system-comparison",
+            "PaGamO Learning &mdash; competitor content platform / teacher "
+            "backend. school.pagamo.org/product-and-service",
           ], small)]
 
     doc = SimpleDocTemplate(OUT, pagesize=A4, topMargin=1.6 * cm,

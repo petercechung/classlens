@@ -101,8 +101,9 @@ def topic_weights(con, latest):
 
 def study_plan(mastery_latest, weights):
     """Personalised, prioritised plan: target the weak topics that are also
-    heavily tested (highest gap x exam-weight). Estimate the score lift from
-    raising each to an achievable target, so the report can promise a number."""
+    heavily tested (highest gap x exam-weight). `est_gain` is an EXPLAINABLE
+    HEURISTIC (raise a topic by a capped step toward a target, weighted by its
+    exam share) -- an opportunity estimate, NOT a validated prediction."""
     rows = []
     for t, m in mastery_latest.items():
         w = weights.get(t, 0.0)
